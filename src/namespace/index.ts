@@ -7,7 +7,7 @@ export interface NamespaceObject extends DataObject {
     metadata: Metadata
     spec?: {
         finalizers: string[]
-    },
+    }
     status?: {
         phase: string
     }
@@ -15,14 +15,6 @@ export interface NamespaceObject extends DataObject {
 
 export class Namespace extends DataType<NamespaceObject> {
     create() {
-        return this.client.api.v1.namespaces.post({
-            body: {
-                apiVersion: 'v1',
-                kind: 'Namespace',
-                metadata: {
-                    name: this.data.metadata.name,
-                },
-            }
-        })
+        return this.client.api.v1.namespaces.post({ body: this.data })
     }
 }

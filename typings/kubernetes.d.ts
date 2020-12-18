@@ -1,4 +1,4 @@
-import { Stream } from "stream";
+import { Stream } from 'stream'
 
 declare module 'kubernetes-client' {
     export interface ApiV1WatchPods {
@@ -14,6 +14,22 @@ declare module 'kubernetes-client' {
     }
 
     export interface ApiV1WatchNamespacesNamePods {
+        getObjectStream(opts?: any): Stream
+    }
+
+    export interface ApiV1WatchEndpoints {
+        getObjectStream(opts?: any): Stream
+    }
+
+    export interface ApiV1WatchServices {
+        getObjectStream(opts?: any): Stream
+    }
+
+    export interface ApiV1WatchServiceaccounts {
+        getObjectStream(opts?: any): Stream
+    }
+
+    export interface ApiV1WatchSecrets {
         getObjectStream(opts?: any): Stream
     }
 

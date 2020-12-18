@@ -1,37 +1,35 @@
+import { Stream } from 'stream'
 import { Namespace, NamespaceObject } from '.'
 import { Manager } from '../manager'
 
 export class NamespaceManager extends Manager<NamespaceObject, Namespace> {
-    private namespaces: Namespace[] = []
+    createData(name: string): NamespaceObject {
+        return {
+            apiVersion: 'v1',
+            kind: 'Namespace',
+            metadata: {
+                name: name,
+                uid: null,
+            },
+        }
+    }
 
-    createItem(data: NamespaceObject) {
+    createItem(data: NamespaceObject): Namespace {
         return new Namespace(this.server, data)
     }
 
-    async createWatcher() {
+    async createWatcher(): Promise<Stream> {
         return await this.client.api.v1.watch.namespaces.getObjectStream()
     }
 
-    async ensure(name: string) {
-        let namespace = this.namespaces.find((ns) => ns.data.metadata.name === name)
-
-        if (namespace) {
-            return true
-        }
-
-        namespace = new Namespace(this.server, {
+    ensureNamespace(name: string): Promise<boolean> {
+        return this.ensure({
+            apiVersion: 'v1',
+            kind: 'Namespace',
             metadata: {
+                name: name,
                 uid: null,
-                name: 'rooms',
             },
         })
-
-        try {
-            await namespace.create()
-        } catch(err) {
-            if (err.code !== 409) {
-                throw err
-            }
-        }
     }
 }

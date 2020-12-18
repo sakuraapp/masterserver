@@ -1,9 +1,9 @@
-import { Socket } from 'net'
+import WebSocket from 'ws'
 import MasterServer from './server'
 import { Child } from '../types'
 import { parseJSON } from '../utils'
 
-type PacketType = 'call' | 'watch' | 'callback'
+export type PacketType = 'call' | 'watch' | 'callback'
 
 export interface PacketData<T = unknown> {
     s?: string // service name
@@ -17,11 +17,11 @@ export class Packet<T = unknown> {
     public readonly data: PacketData<T>
     public readonly client: Client
 
-    get type() {
+    get type(): string {
         return this.data.t
     }
 
-    get service() {
+    get service(): string {
         return this.data.s
     }
 
@@ -30,7 +30,7 @@ export class Packet<T = unknown> {
         this.client = client
     }
 
-    respond(data: unknown) {
+    respond(data: unknown): void {
         this.client.write({
             d: data,
             t: 'callback',
@@ -42,47 +42,39 @@ export class Packet<T = unknown> {
 export type ClientType = 'service' | 'user'
 
 export class Client extends Child {
-    public socket: Socket
+    public socket: WebSocket
     public authorized = false
 
-    get address() {
-        return this.socket.remoteAddress.replace(/^.*:/, '')
-    }
-
-    constructor(socket: Socket, server: MasterServer) {
+    constructor(socket: WebSocket, server: MasterServer) {
         super(server, false)
 
         this.socket = socket
         this.registerEvents()
     }
 
-    registerEvents() {
-        this.socket.on('data', (data) => {
-            const packets: PacketData[] = data
-                .toString('utf8')
-                .split('\0')
-                .map((rawPacket) => parseJSON(rawPacket, null))
-                .filter((packet) => packet) // remove invalid packets
+    registerEvents(): void {
+        this.socket.on('message', (data) => {
+            const packet = parseJSON(data.toString('utf8'), null)
 
-            packets.forEach((packet) => {
+            if (packet) {
                 if (!packet.t) {
                     throw new Error(`Malformed packet: ${packet}`)
                 }
 
-                this.serviceManager.handle(new Packet(packet, this))
-            })
+                this.remoteServiceManager.handle(new Packet(packet, this))
+            }
+        })
+
+        this.socket.on('close', () => {
+            this.emit('disconnect')
         })
     }
 
-    inCluster() {
-        return this.server.authorizedAddresses.includes(this.address)
+    write(data: PacketData): void {
+        this.socket.send(JSON.stringify(data))
     }
 
-    write(data: PacketData) {
-        this.socket.write(JSON.stringify(data) + '\0')
-    }
-
-    destroy() {
-        this.socket.destroy()
+    destroy(): void {
+        this.socket.close()
     }
 }

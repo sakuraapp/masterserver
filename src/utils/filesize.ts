@@ -14,10 +14,14 @@ export class FileSize {
             unit = 1024
             parts = ['K', 'iB']
         }
-        
-        const value = Math.log(bytes) / Math.log(unit) | 0
-        
-        return (bytes / Math.pow(unit, value)).toFixed(2) + ' ' + (value ? (parts[0] + 'MGTPEZY')[value - 1] + parts[1] : 'bytes')
+
+        const value = (Math.log(bytes) / Math.log(unit)) | 0
+
+        return (
+            (bytes / Math.pow(unit, value)).toFixed(2) +
+            ' ' +
+            (value ? (parts[0] + 'MGTPEZY')[value - 1] + parts[1] : 'bytes')
+        )
     }
 
     static parse(input: string): number {
@@ -38,9 +42,12 @@ export class FileSize {
 
         str = str.trim().toLowerCase()
         const num = Number(rawNum)
-        const unit = str.charAt(1) == 'i' ? 1024 : 1000 // si or iec
-        const multiplier = unit * FileSize.symbols.indexOf(str.charAt(0))
+        const unit = str.charAt(1) === 'i' ? 1024 : 1000 // si or iec
+        const multiplier = Math.pow(
+            unit,
+            FileSize.symbols.indexOf(str.charAt(0)) + 1
+        )
 
-        return num * (multiplier || 1)
+        return num * multiplier
     }
 }
