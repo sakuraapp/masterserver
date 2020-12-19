@@ -1,5 +1,5 @@
 {
-  "name": "masterserver",
+  "name": "@sakuraapp/masterserver",
   "version": "1.0.0",
   "description": "",
   "main": "dist/index.js",
@@ -8,8 +8,20 @@
     "dev": "ts-node-dev --files --respawn --rs src/index.ts",
     "build": "tsc"
   },
-  "author": "jackie",
-  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sakuraapp/masterserver.git"
+  },
+  "author": {
+    "name": "Ahmed El-Marakby",
+    "email": "ahmedelmarakby@hotmail.com",
+    "url": "https://pyrodash.github.io"
+  },
+  "bugs": {
+    "url": "https://github.com/sakuraapp/masterserver/issues"
+  },
+  "homepage": "https://github.com/sakuraapp/masterserver#readme",
+  "license": "AGPL-3.0-only",
   "dependencies": {
     "@sakuraapp/chakra-client": "^1.0.0",
     "dotenv": "^8.2.0",
